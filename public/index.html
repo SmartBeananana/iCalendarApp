@@ -1,0 +1,127 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Calendar Viewer</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="CHANGE ME">
+    <meta name="keywords" content="iCalendar">
+    <meta name="author" content="Monica Lian">
+    <!-- Load jquery, bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="/style.css">
+    <!-- Custom CSS End -->
+</head>
+<body>
+    <form id = "login">
+        Login<br>
+        Username:<br><input type="text" id ="username" autocomplete="off" required><br>
+        Password:<br><input type="password" id = "password" required><br>
+        Database Name:<br><input type="text" id = "database" required><br>
+        <input type="submit" value="Login">
+    </form>
+    <hr>
+        <button id = "storefiles" onclick = 'DBStoreFiles()' disabled = true>Store All Files</button>
+        <button id = "cleardata" onclick = 'DBClearData()' disabled = true>Clear All Data</button>
+        <button id = "displaystatus" onclick = 'DBDisplayStatus()' disabled = true>Display DB Status</button>
+    <hr>
+        <select id = "selquery" name = "selquery" disabled>
+            <option value = "events_bydates">display all events (by start date)</option>
+            <option value = "events_from_file">display event from a file</option>
+            <option value = "conflict_events">display conflict events</option>
+            <option value = "events_in_guelph">display events in guelph</option>
+            <option value = "alarm_bydates">display all alarms (by date and time)</option>
+            <option value = "upcoming_event">display the upcoming events</option>
+        </select>
+        <select name="query_filename_list" id="query_filename_list" >
+            <option value="">File</option>
+        </select>
+            <button id = "executequery" onclick = 'DBExecuteQuery()' disabled = true>Execute Query</button>
+            <div id = "scroll">
+                <table style="width:100%", id = "execute_table">
+                      <thead>
+                          <tr id = "executequery">
+                          </tr>
+                      </thead>
+                </table>
+            </div>
+    <hr>
+        <div id= "scroll">Status Message:<div id="meg"></div></div>
+        <button id = "clear" onclick='clearBox()'>Clear</button>
+    <hr>
+    <div id = "scroll">
+        <table id = "filelog_table" style="width:100%">
+            <tr id = "filelogRows">
+                <th><center>File Name<br />(click to download)</th>
+                <th><center>Version</th>
+                <th><center>Product ID</th>
+                <th><center>Number of <br> events</th>
+                <th><center>Number of <br> properties</th>
+            </tr>
+        </table>
+        <form>
+            <lable for = "fileUpload">Upload file</lable><br>
+            <input type = "file" id = "fileUpload" accept = ".ics"></input>
+        </from>
+    </div>
+    <hr>
+    <div id = "scroll">
+        <table style="width:100%", id = "calendarview_table">
+            <form name="drop_list" method="post" action = "/uploads" enctype="multipart/form-data">
+                <select name="filename_list" id="filename_list">
+                    <option value="">File</option>
+                </select>
+            </form>
+                <thead>
+                    <tr id = "calendarview">
+                        <th><center>Alarms</th>
+                        <th><center>Optional<br>Properties</th>
+                        <th><center>Event No</th>
+                        <th><center>Start Date</th>
+                        <th><center>Start Time</th>
+                        <th><center>Summary</th>
+                        <th><center>Props</th>
+                        <th><center>Alarms</th>
+                    </tr>
+                </thead>
+        </table>
+    </div>
+    <hr>
+    <form id="createCalendar" ref="createCalendar" method = "POST">
+       <div id = "CalendarInput">
+           To Create A Calendar<br>
+           Filename:<br><input type="text" id ="filename" required><br>
+           Version No:<br><input type="text" id ="version" required><br>
+           Product ID:<br><input type="text" id ="prodID" required><br><br>
+           Event<br>
+           UID:<br><input type="text" id ="uid" required><br>
+           Summary(*optional):<br><input type="text" id ="summary"><br>
+           Start Date:(YYYYMMDD)<br><input type="text" id ="date" required><br>
+           Start Time:(HHMMSS)<br><input type="text" id ="time" required><br>
+           UTC:(true/false)<br><input type="text" id ="utc" required><br>
+       </div>
+       <input type="submit" value="Create Calendar">
+    </form>
+    <hr>
+    <form id="addEvent" ref="addEvent" method="POST">
+        <select name="addEvent_filename_list" id="addEvent_filename_list">
+            <option value="">File</option>
+        </select>
+        <div id = "">
+            To Add An Event<br>
+            UID:<br><input type="text" id ="uidAE"><br>
+            Summary(*optional):<br><input type="text" id ="summaryAE"><br>
+            Start Date:(YYYYMMDD)<br><input type="text" id ="dateAE"><br>
+            Start Time:(HHMMSS)<br><input type="text" id ="timeAE"><br>
+            UTC:(true/false)<br><input type="text" id ="utcAE"><br>
+        </div>
+        <input type="submit" value="Add event">
+    <!-- Leave me at the bottom of body -->
+    <script src="/index.js"></script>
+</body>
+</html>
